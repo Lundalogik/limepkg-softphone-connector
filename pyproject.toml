@@ -1,0 +1,55 @@
+[build-system]
+requires      = ['poetry>=0.12']
+build-backend = 'poetry.masonry.api'
+
+[tool.metadata]
+display_name  = 'softphone connector'
+package_name  = 'limepkg-softphone-connector'
+lib_name      = 'limepkg_softphone_connector'
+
+[tool.poetry]
+name        = 'limepkg-softphone-connector'
+version     = '0.1.0'
+description = 'Lime CRM package'
+authors     = ['Author <author@lime.tech>']
+
+[[tool.poetry.source]]
+name = 'lime'
+url  = 'https://pypi.lime.tech/simple/'
+secondary = true
+
+[tool.poetry.plugins.'lime_plugins']
+'limepkg-softphone-connector' = 'limepkg_softphone_connector'
+
+[tool.poetry.dependencies]
+python = '~3.7.3'
+lime-crm = '^2.322.0'
+phonenumbers = "^8.12.52"
+
+[tool.poetry.dev-dependencies]
+autopep8 = '>=1'
+pytest = '>=6.2.3'
+flake8 = '>3'
+
+[tool.lime]
+[tool.lime.project]
+project_version = '1.156.1'
+project_type    = 'package'
+
+
+[tool.pytest.ini_options]
+minversion = '6.0'
+norecursedirs = [
+    'venv',
+    '.venv',
+    'build',
+    'dist',
+    '.plugins',
+    'frontend',
+    '.env',
+    '.git',
+    '.github',
+    '.lime',
+    '.vscode'
+]
+faulthandler_timeout = 300

@@ -1,0 +1,60 @@
+# This is auto-generated - do not touch!
+name: Update Workflows
+
+on:
+  repository_dispatch:
+    types: [update-workflow]
+
+jobs:
+  preflight:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ 3.7 ]
+        poetry-version: [ 1.0.10 ]
+    outputs:
+      disable_autogenerate_workflows: ${{ steps.autoupdate-workflow.outputs.disable_autogenerate_workflows }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pipx install lime-buildtools -i https://${{secrets.PYPI_USERNAME}}:${{secrets.PYPI_PASSWORD}}@pypi.lime.tech/simple
+      - name: Validate workflow update enabled
+        id: autoupdate-workflow
+        run: lime-buildtools ci set-output-from-pyproject-deployment
+  upgrade:
+    runs-on: ubuntu-latest
+    needs: preflight
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ 3.7 ]
+        poetry-version: [ 1.0.10 ]
+    if: needs.preflight.outputs.disable_autogenerate_workflows != 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install lime-project -i https://${{secrets.PYPI_USERNAME}}:${{secrets.PYPI_PASSWORD}}@pypi.lime.tech/simple
+      - run: lime-project doctor generate gh-actions -y
+      - name: Git add/commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+        env:
+          GITHUB_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+      - name: create pull request
+        id: pr_generator
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "chore: [workflow-update] Update the workflows"
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          branch: workflows-update
+          branch-suffix: random
+          commit-message: |
+            chore: [workflow-update] Automatic update of the ci workflow files.

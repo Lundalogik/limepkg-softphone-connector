@@ -1,0 +1,23 @@
+# This is auto-generated - do not touch!
+name: Auto Merge Update Workflows
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+jobs:
+  automerge:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    steps:
+    - name: workflow update process merge PR
+      if: contains(github.event.pull_request.title, '[workflow-update]')
+      uses: "pascalgn/automerge-action@v0.12.0"
+      env:
+        GITHUB_TOKEN: "${{ secrets.DISPATCH_TOKEN }}"
+        MERGE_METHOD: "rebase"
+        MERGE_DELETE_BRANCH: "true"
+        MERGE_LABELS: "" # merge workflows workflow-update PRs
